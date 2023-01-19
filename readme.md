@@ -1,3 +1,9 @@
+# Usando Airflow para osquestrar uma pipeline
+
+Este projeto consiste num scraping de informações sobre o campeonato espanhol, os times, pontuação
+e outras informações. Como esses dados são atualizados constantemente, utilizar o airflow se torna
+interessante para rodar a pipeline semanalmente e atualizar suas informações.
+
 ##  Rodando o apache airflow 2.0 no docker com LocalExecutor.
 
 1. Clone este repo
