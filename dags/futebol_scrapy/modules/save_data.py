@@ -2,8 +2,8 @@ import os
 
 def format_all_teams():
     teams = []
-    if os.path.exists("dags/spain_table.csv"):
-        with open('dags/spain_table.csv') as f:
+    if os.path.exists("dags/championship_table.csv"):
+        with open('dags/championship_table.csv') as f:
             for lines in f.readlines()[1:]:
                 line = lines.split(',')
                 line[-1] = line[-1].replace('\n', '')
@@ -19,7 +19,7 @@ def build_insert_or_update_query(team):
     INSERT INTO time (id, time, p, j, v, e, d, gp, gc, sg, porc)
     VALUES ({team[0]}, '{team[1]}', {team[2]}, {team[3]}, {team[4]}, {team[5]}, 
     {team[6]}, {team[7]}, {team[8]}, {team[9]}, {team[10]})
-    ON CONFLICT (id) DO UPDATE 
+    ON CONFLICT (time) DO UPDATE 
         SET time = '{team[1]}', 
             p = {team[2]}, 
             j = {team[3]}, 
@@ -31,7 +31,7 @@ def build_insert_or_update_query(team):
             sg = {team[9]}, 
             porc = {team[10]}; """
 
-def save_data_in_database():
+def save_data_in_db():
     teams =  format_all_teams()
     insert_or_update_query = """"""
     for time in teams:

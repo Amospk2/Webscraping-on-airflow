@@ -1,10 +1,10 @@
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
-
+from airflow.decorators import task
 
 def build_soup():
-    web = 'https://www.gazetaesportiva.com/campeonatos/laliga/'
+    web = 'https://www.gazetaesportiva.com/campeonatos/brasileiro-serie-a/'
     request = requests.get(web)
     content = request.text
     return BeautifulSoup(content, 'lxml')
@@ -57,6 +57,7 @@ def get_stats_from_table():
         "porc":porc
     }
 
+@task()
 def start_pipeline():
     df = pd.DataFrame(get_stats_from_table())
-    df.to_csv("dags/spain_table.csv", index=False)
+    df.to_csv("dags/championship_table.csv", index=False)

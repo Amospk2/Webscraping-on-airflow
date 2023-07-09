@@ -1,11 +1,14 @@
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.operators.python import PythonOperator
-from airflow import DAG
+import json
 from datetime import timedelta, datetime
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+import pendulum
+
+from airflow.decorators import dag, task
 
 import sys
 sys.path.append("/opt/airflow/dags/futebol_scrapy/")
 from modules import clear_output, save_data, webscraping
+
 
 default_args = {
     'owner':'Amospk2',
@@ -13,13 +16,15 @@ default_args = {
     'retry_delay':timedelta(minutes=5)
 }
 
-with DAG(
+@dag(
+    schedule=None,
     default_args=default_args,
-    dag_id="LaLiga_webscraping_dag",
-    start_date=datetime(2023, 1, 19),
-    end_date=datetime(2023, 6, 4),
+    start_date=pendulum.datetime(2023, 7, 9, tz="UTC"),
+    catchup=False,
+    dag_id="brasileirao_webscraping_dag",
     schedule_interval="0 0 * * 2"
-) as dag:
+)
+def tutorial_taskflow_api():
 
     set_db_configs_if_dont_exists = PostgresOperator(
         task_id='set_db_configs_if_dont_exists',
@@ -41,21 +46,12 @@ with DAG(
         """
     )
 
-    run_pipeline = PythonOperator(
-        task_id="run_pipeline",
-        python_callable=webscraping.start_pipeline
-    )
-
-    save_data = PostgresOperator(
+    loading = PostgresOperator(
         task_id="save_data_in_database",
         postgres_conn_id="airflow_postgres",
-        sql=save_data.save_data_in_database()
+        sql=save_data.save_data_in_db()
     )
 
-    clean_outputs = PythonOperator(
-        task_id="clean_all_outputs",
-        python_callable=clear_output.clean_all_outputs
-    )
+    set_db_configs_if_dont_exists >> webscraping.start_pipeline() >> loading >> clear_output.clean_all_outputs()
 
-    set_db_configs_if_dont_exists >> run_pipeline >> save_data >> clean_outputs
-     
+tutorial_taskflow_api()
